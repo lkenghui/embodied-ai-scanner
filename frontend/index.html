@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Embodied AI Scanner</title>
+  <link rel="stylesheet" href="/static/styles.css?v=11" />
+</head>
+<body>
+
+  <div class="top-bar">Embodied AI &amp; Humanoid Robotics Intelligence</div>
+
+  <header>
+    <div class="header-inner">
+      <div class="header-logo">
+        <h1>Embodied AI Scanner</h1>
+        <span class="logo-sub">Research &amp; Industry Intelligence</span>
+      </div>
+      <div class="header-right">
+        <div id="scan-status"></div>
+        <button id="scan-btn">Run Scan</button>
+      </div>
+    </div>
+    <div id="scan-progress-wrap" class="progress-wrap">
+      <div id="scan-progress-bar-bg"><div id="scan-progress-bar"></div></div>
+      <div id="scan-progress-label"></div>
+    </div>
+  </header>
+
+
+  <main>
+
+    <!-- Trends + Signals side by side -->
+    <div class="insight-grid section-divider">
+      <section id="trends-section">
+        <div class="section-header">
+          <h2>Weekly Trends</h2>
+        </div>
+        <div id="trends-content" class="insight-card">Loading...</div>
+        <p id="trends-date" class="meta"></p>
+      </section>
+
+      <section id="signals-section">
+        <div class="section-header">
+          <h2>Weak Signals</h2>
+          <span class="section-hint">Emerging on the horizon</span>
+        </div>
+        <div id="signals-content" class="insight-card card-signals">Loading...</div>
+        <p id="signals-date" class="meta"></p>
+      </section>
+    </div>
+
+    <!-- Filters -->
+    <section id="filters-section" class="filters-section">
+      <div class="filters-card">
+        <div class="filters">
+          <select id="filter-topic">
+            <option value="">All Topics</option>
+            <option value="humanoid">Humanoid</option>
+            <option value="locomotion">Locomotion</option>
+            <option value="manipulation">Manipulation</option>
+            <option value="world model">World Models</option>
+            <option value="sim-to-real">Sim-to-Real</option>
+            <option value="vision-language-action">VLA</option>
+            <option value="investment">Funding</option>
+            <option value="hardware">Hardware</option>
+            <option value="tactile">Tactile Sensing</option>
+          </select>
+          <select id="filter-source"><option value="">All Sources</option></select>
+          <select id="filter-company"><option value="">All Companies</option></select>
+          <select id="filter-significance">
+            <option value="">All Significance</option>
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
+          </select>
+          <button id="apply-filters">Apply</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Articles -->
+    <section id="articles-section">
+      <div class="section-header">
+        <h2>Latest Articles</h2>
+        <span id="article-count"></span>
+      </div>
+      <div id="articles-list" class="articles-grid"></div>
+    </section>
+
+  </main>
+
+  <script src="/static/app.js?v=11"></script>
+</body>
+</html>
