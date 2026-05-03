@@ -27,8 +27,8 @@ body {
 
 /* ── TOP BAR ── */
 .top-bar {
-  background: var(--teal);
-  color: var(--teal-light);
+  background: #800000;
+  color: #f5c6c6;
   font-size: 0.7rem;
   font-weight: 600;
   letter-spacing: 0.1em;
