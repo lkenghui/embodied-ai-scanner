@@ -10,6 +10,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from backend.scrapers import fetch_arxiv_papers, fetch_mit_tech_review, fetch_company_blogs, fetch_venturebeat, fetch_the_verge
 from backend.agents import is_relevant, detect_company, summarise, tag, generate_trend_report, detect_weak_signals
 from backend.database import upsert_article, save_trend_report, get_articles, save_topic_snapshot, get_topic_history, save_signal_report
+from config import TOPIC_AREA_KEYWORDS
 
 _scan_lock = threading.Lock()
 scan_state = {"running": False, "processed": 0, "total": 0, "saved": 0, "stage": ""}
@@ -95,21 +96,53 @@ def _run_scan():
         save_topic_snapshot(datetime.utcnow().isoformat(), topic_counts)
         print(f"[pipeline] Topic snapshot saved: {topic_counts}")
 
-    # 7. Generate trend report from recent articles
+    # 7. Generate trend + signal reports — global ("all") and per topic area
     recent = get_articles(limit=80)
-    if recent:
-        report = generate_trend_report(recent)
-        save_trend_report(report)
-        print("[pipeline] Trend report generated")
-
-    # 8. Generate weak signal report from topic history
+    history = []
     try:
         history = get_topic_history(days=60)
-        signal_report = detect_weak_signals(history)
-        save_signal_report(signal_report)
-        print("[pipeline] Weak signal report generated")
     except Exception as e:
-        print(f"[pipeline] Weak signal detection failed: {e}")
+        print(f"[pipeline] Could not fetch topic history: {e}")
+
+    def articles_for_area(articles, area_keywords):
+        def matches(a):
+            text = ((a.get("tags") or "") + " " + (a.get("title") or "")).lower()
+            return any(kw in text for kw in area_keywords)
+        return [a for a in articles if matches(a)]
+
+    def topics_for_area(topic_history, area_keywords):
+        return [row for row in topic_history if any(kw in row["topic"].lower() for kw in area_keywords)]
+
+    # Global report
+    if recent:
+        report = generate_trend_report(recent)
+        save_trend_report(report, topic_area="all")
+        print("[pipeline] Global trend report generated")
+    try:
+        signal_report = detect_weak_signals(history)
+        save_signal_report(signal_report, topic_area="all")
+        print("[pipeline] Global weak signal report generated")
+    except Exception as e:
+        print(f"[pipeline] Global signal detection failed: {e}")
+
+    # Per-topic reports
+    for area, keywords in TOPIC_AREA_KEYWORDS.items():
+        area_articles = articles_for_area(recent, keywords)
+        if area_articles:
+            try:
+                report = generate_trend_report(area_articles)
+                save_trend_report(report, topic_area=area)
+                print(f"[pipeline] Trend report generated for {area}")
+            except Exception as e:
+                print(f"[pipeline] Trend report failed for {area}: {e}")
+        area_history = topics_for_area(history, keywords)
+        if area_history:
+            try:
+                signal_report = detect_weak_signals(area_history)
+                save_signal_report(signal_report, topic_area=area)
+                print(f"[pipeline] Signal report generated for {area}")
+            except Exception as e:
+                print(f"[pipeline] Signal report failed for {area}: {e}")
 
     print("[pipeline] Scan complete")
 

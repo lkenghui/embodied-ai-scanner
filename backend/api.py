@@ -35,8 +35,8 @@ def articles(
 
 
 @app.get("/api/trends")
-def trends():
-    return get_latest_trend() or {"report": "No trend report yet. Run a scan first.", "generated_at": None}
+def trends(topic: str = Query("all")):
+    return get_latest_trend(topic) or {"report": "No trend report yet. Run a scan first.", "generated_at": None}
 
 
 @app.get("/api/filters")
@@ -45,8 +45,8 @@ def filters():
 
 
 @app.get("/api/signals")
-def signals():
-    return get_latest_signal() or {"report": "No signal report yet. Run a scan first.", "generated_at": None}
+def signals(topic: str = Query("all")):
+    return get_latest_signal(topic) or {"report": "No signal report yet. Run a scan first.", "generated_at": None}
 
 
 @app.get("/api/scan/status")

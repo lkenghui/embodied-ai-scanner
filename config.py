@@ -51,3 +51,24 @@ THE_VERGE_AI_FEED = "https://www.theverge.com/ai-artificial-intelligence/rss/ind
 
 SCAN_HOUR = 7   # run daily at 7am
 SCAN_MINUTE = 0
+
+# Keywords used to filter articles into topic areas for per-tab reports
+TOPIC_AREA_KEYWORDS = {
+    "embodied": [
+        "humanoid", "locomotion", "manipulation", "dexterous", "whole-body",
+        "sim-to-real", "world model", "vision-language-action", "legged",
+        "autonomous navigation", "tactile", "imitation learning",
+    ],
+    "agentic": [
+        "agentic", "multi-agent", "tool use", "ai planning", "ai reasoning",
+        "autonomous agent", "agent framework",
+    ],
+    "physics": [
+        "physics simulation", "physics-informed", "differentiable simulation",
+        "neural physics", "generative physics",
+    ],
+    "quantum": [
+        "quantum machine learning", "quantum computing", "quantum algorithm",
+        "quantum hardware", "quantum neural",
+    ],
+}

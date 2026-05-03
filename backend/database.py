@@ -28,7 +28,8 @@ def init_db():
         CREATE TABLE IF NOT EXISTS trends (
             id          INTEGER PRIMARY KEY AUTOINCREMENT,
             report      TEXT NOT NULL,
-            generated_at TEXT NOT NULL
+            generated_at TEXT NOT NULL,
+            topic_area  TEXT NOT NULL DEFAULT 'all'
         );
 
         CREATE TABLE IF NOT EXISTS topic_snapshots (
@@ -41,7 +42,8 @@ def init_db():
         CREATE TABLE IF NOT EXISTS signals (
             id          INTEGER PRIMARY KEY AUTOINCREMENT,
             report      TEXT NOT NULL,
-            generated_at TEXT NOT NULL
+            generated_at TEXT NOT NULL,
+            topic_area  TEXT NOT NULL DEFAULT 'all'
         );
 
         CREATE INDEX IF NOT EXISTS idx_articles_source    ON articles(source);
@@ -68,11 +70,11 @@ def upsert_article(title, url, source, company, published, summary, tags, signif
     conn.close()
 
 
-def save_trend_report(report: str):
+def save_trend_report(report: str, topic_area: str = "all"):
     conn = get_conn()
     conn.execute(
-        "INSERT INTO trends (report, generated_at) VALUES (?, ?)",
-        (report, datetime.utcnow().isoformat())
+        "INSERT INTO trends (report, generated_at, topic_area) VALUES (?, ?, ?)",
+        (report, datetime.utcnow().isoformat(), topic_area)
     )
     conn.commit()
     conn.close()
@@ -95,9 +97,12 @@ def get_articles(source=None, company=None, limit=200):
     return rows
 
 
-def get_latest_trend():
+def get_latest_trend(topic_area: str = "all"):
     conn = get_conn()
-    row = conn.execute("SELECT * FROM trends ORDER BY generated_at DESC LIMIT 1").fetchone()
+    row = conn.execute(
+        "SELECT * FROM trends WHERE topic_area = ? ORDER BY generated_at DESC LIMIT 1",
+        (topic_area,)
+    ).fetchone()
     conn.close()
     return dict(row) if row else None
 
@@ -140,18 +145,21 @@ def get_topic_history(days: int = 60) -> list[dict]:
     return [dict(r) for r in rows]
 
 
-def save_signal_report(report: str):
+def save_signal_report(report: str, topic_area: str = "all"):
     conn = get_conn()
     conn.execute(
-        "INSERT INTO signals (report, generated_at) VALUES (?, ?)",
-        (report, datetime.utcnow().isoformat())
+        "INSERT INTO signals (report, generated_at, topic_area) VALUES (?, ?, ?)",
+        (report, datetime.utcnow().isoformat(), topic_area)
     )
     conn.commit()
     conn.close()
 
 
-def get_latest_signal():
+def get_latest_signal(topic_area: str = "all"):
     conn = get_conn()
-    row = conn.execute("SELECT * FROM signals ORDER BY generated_at DESC LIMIT 1").fetchone()
+    row = conn.execute(
+        "SELECT * FROM signals WHERE topic_area = ? ORDER BY generated_at DESC LIMIT 1",
+        (topic_area,)
+    ).fetchone()
     conn.close()
     return dict(row) if row else None

@@ -163,31 +163,37 @@ async function loadFilters() {
   } catch (e) { console.error("Failed to load filters", e); }
 }
 
-async function loadTrends() {
+async function loadTrends(tab) {
+  const box = document.getElementById("trends-content");
+  box.innerHTML = "Loading...";
   try {
-    const data = await fetchJSON("/api/trends");
-    const box = document.getElementById("trends-content");
+    const data = await fetchJSON("/api/trends?topic=" + (tab || "all"));
     box.innerHTML = renderMarkdown(data.report || "No trends yet.");
     if (data.generated_at) {
       document.getElementById("trends-date").textContent =
         "Generated: " + new Date(data.generated_at).toLocaleString();
+    } else {
+      document.getElementById("trends-date").textContent = "";
     }
   } catch (e) {
-    document.getElementById("trends-content").textContent = "Failed to load trends.";
+    box.textContent = "Failed to load trends.";
   }
 }
 
-async function loadSignals() {
+async function loadSignals(tab) {
+  const box = document.getElementById("signals-content");
+  box.innerHTML = "Loading...";
   try {
-    const data = await fetchJSON("/api/signals");
-    const box = document.getElementById("signals-content");
+    const data = await fetchJSON("/api/signals?topic=" + (tab || "all"));
     box.innerHTML = renderMarkdown(data.report || "No signals yet.");
     if (data.generated_at) {
       document.getElementById("signals-date").textContent =
         "Generated: " + new Date(data.generated_at).toLocaleString();
+    } else {
+      document.getElementById("signals-date").textContent = "";
     }
   } catch (e) {
-    document.getElementById("signals-content").textContent = "Failed to load signals.";
+    box.textContent = "Failed to load signals.";
   }
 }
 
@@ -246,6 +252,10 @@ function switchTab(tab) {
   document.getElementById("articles-title").textContent =
     tab === "all" ? "Latest Articles" : TABS[tab].label + " — Latest Articles";
 
+  // Reload trends and signals for this tab
+  loadTrends(tab);
+  loadSignals(tab);
+
   renderArticleList();
 }
 
@@ -290,7 +300,7 @@ function startScanPolling() {
         btn.disabled = false;
         btn.textContent = "Run Scan";
         status.textContent = "Scan complete. Refreshing results...";
-        await Promise.all([loadArticles(), loadTrends(), loadSignals(), loadFilters()]);
+        await Promise.all([loadArticles(), loadTrends(activeTab), loadSignals(activeTab), loadFilters()]);
         status.textContent = `Scan complete — ${state.saved} articles saved.`;
         setTimeout(hideProgressBar, 3000);
       }
@@ -317,8 +327,8 @@ document.getElementById("scan-btn").addEventListener("click", async () => {
 // ── INIT ──────────────────────────────────────────────────────────────────────
 
 loadFilters();
-loadTrends();
-loadSignals();
+loadTrends("all");
+loadSignals("all");
 loadArticles();
 
 (async () => {
