@@ -1,7 +1,7 @@
 import feedparser
 import httpx
 from datetime import datetime
-from config import MIT_TECH_REVIEW_FEED, COMPANY_BLOG_FEEDS
+from config import MIT_TECH_REVIEW_FEED, COMPANY_BLOG_FEEDS, VENTUREBEAT_AI_FEED, THE_VERGE_AI_FEED
 
 
 def _parse_feed(url: str, source: str, company: str = None) -> list[dict]:
@@ -32,6 +32,14 @@ def _parse_feed(url: str, source: str, company: str = None) -> list[dict]:
 
 def fetch_mit_tech_review() -> list[dict]:
     return _parse_feed(MIT_TECH_REVIEW_FEED, source="MIT Technology Review")
+
+
+def fetch_venturebeat() -> list[dict]:
+    return _parse_feed(VENTUREBEAT_AI_FEED, source="VentureBeat")
+
+
+def fetch_the_verge() -> list[dict]:
+    return _parse_feed(THE_VERGE_AI_FEED, source="The Verge")
 
 
 def fetch_company_blogs() -> list[dict]:

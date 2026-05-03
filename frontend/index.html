@@ -3,18 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Embodied AI Scanner</title>
+  <title>AI Intelligence Scanner</title>
   <link rel="stylesheet" href="/static/styles.css?v=11" />
 </head>
 <body>
 
-  <div class="top-bar">Embodied AI &amp; Humanoid Robotics Intelligence</div>
+  <div class="top-bar">AI Research &amp; Industry Intelligence</div>
 
   <header>
     <div class="header-inner">
       <div class="header-logo">
-        <h1>Embodied AI Scanner</h1>
-        <span class="logo-sub">Research &amp; Industry Intelligence</span>
+        <h1>AI Intelligence Scanner</h1>
+        <span class="logo-sub">Embodied AI · Agentic AI · Physics AI · Quantum AI · Trends</span>
       </div>
       <div class="header-right">
         <div id="scan-status"></div>
@@ -56,15 +56,39 @@
         <div class="filters">
           <select id="filter-topic">
             <option value="">All Topics</option>
-            <option value="humanoid">Humanoid</option>
-            <option value="locomotion">Locomotion</option>
-            <option value="manipulation">Manipulation</option>
-            <option value="world model">World Models</option>
-            <option value="sim-to-real">Sim-to-Real</option>
-            <option value="vision-language-action">VLA</option>
-            <option value="investment">Funding</option>
-            <option value="hardware">Hardware</option>
-            <option value="tactile">Tactile Sensing</option>
+            <optgroup label="Embodied AI &amp; Robotics">
+              <option value="humanoid">Humanoid</option>
+              <option value="locomotion">Locomotion</option>
+              <option value="manipulation">Manipulation</option>
+              <option value="world model">World Models</option>
+              <option value="sim-to-real">Sim-to-Real</option>
+              <option value="vision-language-action">VLA</option>
+              <option value="hardware">Hardware</option>
+              <option value="tactile">Tactile Sensing</option>
+            </optgroup>
+            <optgroup label="Agentic AI">
+              <option value="agentic AI">Agentic AI</option>
+              <option value="multi-agent">Multi-Agent</option>
+              <option value="tool use">Tool Use</option>
+              <option value="AI planning">AI Planning</option>
+              <option value="AI reasoning">AI Reasoning</option>
+            </optgroup>
+            <optgroup label="Physics-based AI">
+              <option value="physics simulation">Physics Simulation</option>
+              <option value="physics-informed">Physics-Informed ML</option>
+              <option value="differentiable simulation">Differentiable Sim</option>
+            </optgroup>
+            <optgroup label="Quantum Computing &amp; AI">
+              <option value="quantum machine learning">Quantum ML</option>
+              <option value="quantum computing">Quantum Computing</option>
+              <option value="quantum hardware">Quantum Hardware</option>
+            </optgroup>
+            <optgroup label="General AI">
+              <option value="foundation models">Foundation Models</option>
+              <option value="large language models">LLMs</option>
+              <option value="AI safety">AI Safety</option>
+              <option value="investment">Funding</option>
+            </optgroup>
           </select>
           <select id="filter-source"><option value="">All Sources</option></select>
           <select id="filter-company"><option value="">All Companies</option></select>

@@ -7,7 +7,7 @@ import time
 import threading
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-from backend.scrapers import fetch_arxiv_papers, fetch_mit_tech_review, fetch_company_blogs
+from backend.scrapers import fetch_arxiv_papers, fetch_mit_tech_review, fetch_company_blogs, fetch_venturebeat, fetch_the_verge
 from backend.agents import is_relevant, detect_company, summarise, tag, generate_trend_report, detect_weak_signals
 from backend.database import upsert_article, save_trend_report, get_articles, save_topic_snapshot, get_topic_history, save_signal_report
 
@@ -35,7 +35,7 @@ def _run_scan():
     print("[pipeline] Starting scan...")
 
     raw_items = []
-    for fetch_fn in (fetch_arxiv_papers, fetch_mit_tech_review, fetch_company_blogs):
+    for fetch_fn in (fetch_arxiv_papers, fetch_mit_tech_review, fetch_company_blogs, fetch_venturebeat, fetch_the_verge):
         try:
             items = fetch_fn()
             raw_items.extend(items)

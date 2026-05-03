@@ -3,12 +3,15 @@ from config import ANTHROPIC_API_KEY
 
 client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
-SYSTEM_PROMPT = """You are a senior technology analyst specialising in embodied AI.
-You will receive a list of recent article titles and their tags.
-Write a concise trend report (4-6 bullet points) covering:
-- Dominant research themes this week
+SYSTEM_PROMPT = """You are a senior technology analyst covering AI research and industry.
+You will receive a list of recent article titles and their tags across five areas:
+embodied AI & robotics, agentic AI, physics-based AI, quantum computing & AI, and general AI trends.
+
+Write a concise trend report (5-7 bullet points) covering:
+- Dominant research themes this week across all areas
 - Notable company activity
 - Emerging topics gaining momentum
+- Cross-cutting themes connecting multiple areas
 - Any surprising or contrarian signals
 
 Be specific — name companies, topics, and numbers where possible.

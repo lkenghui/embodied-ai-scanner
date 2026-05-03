@@ -5,13 +5,23 @@ from config import ANTHROPIC_API_KEY
 client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
 TOPICS = [
+    # Embodied AI / Robotics
     "locomotion", "manipulation", "dexterous hands", "whole-body control",
     "sim-to-real", "world models", "vision-language-action", "reinforcement learning",
     "imitation learning", "humanoid", "legged robots", "autonomous navigation",
-    "tactile sensing", "hardware", "investment/funding", "policy/regulation",
+    "tactile sensing", "hardware",
+    # Agentic AI
+    "agentic AI", "multi-agent systems", "tool use", "AI planning", "AI reasoning",
+    # Physics-based AI
+    "physics simulation", "physics-informed ML", "differentiable simulation",
+    # Quantum Computing & AI
+    "quantum machine learning", "quantum computing", "quantum algorithms", "quantum hardware",
+    # General AI
+    "foundation models", "large language models", "AI safety", "AI policy",
+    "investment/funding", "policy/regulation",
 ]
 
-SYSTEM_PROMPT = f"""You are a technology analyst specialising in embodied AI.
+SYSTEM_PROMPT = f"""You are a technology analyst covering AI research and industry.
 Given an article title and abstract, return JSON with:
 - "topics": list of 1-3 relevant topics from this list: {TOPICS}
 - "significance": one of "high", "medium", "low"
