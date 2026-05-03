@@ -5,11 +5,68 @@ async function fetchJSON(url) {
 }
 
 function renderMarkdown(text) {
-  return text
-    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-    .replace(/^- (.+)$/gm, "<li>$1</li>")
-    .replace(/(<li>.*<\/li>)/gs, "<ul>$1</ul>");
+  const lines = text.split("\n");
+  let html = "";
+  let inUl = false, inOl = false, inP = false;
+
+  function closeLists() {
+    if (inUl) { html += "</ul>"; inUl = false; }
+    if (inOl) { html += "</ol>"; inOl = false; }
+  }
+  function closeP() {
+    if (inP) { html += "</p>"; inP = false; }
+  }
+
+  for (let line of lines) {
+    if (/^## (.+)/.test(line)) {
+      closeLists(); closeP();
+      html += `<h3 class="insight-heading">${line.replace(/^## /, "")}</h3>`;
+    } else if (/^# (.+)/.test(line)) {
+      closeLists(); closeP();
+      html += `<h3 class="insight-heading">${line.replace(/^# /, "")}</h3>`;
+    } else if (/^\d+\. (.+)/.test(line)) {
+      closeP();
+      if (inUl) { html += "</ul>"; inUl = false; }
+      if (!inOl) { html += "<ol>"; inOl = true; }
+      html += `<li>${line.replace(/^\d+\. /, "").replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")}</li>`;
+    } else if (/^[-•] (.+)/.test(line)) {
+      closeP();
+      if (inOl) { html += "</ol>"; inOl = false; }
+      if (!inUl) { html += "<ul>"; inUl = true; }
+      html += `<li>${line.replace(/^[-•] /, "").replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")}</li>`;
+    } else if (line.trim() === "") {
+      closeLists(); closeP();
+    } else {
+      closeLists();
+      if (!inP) { html += "<p>"; inP = true; }
+      else html += " ";
+      html += line.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+    }
+  }
+  closeLists(); closeP();
+  return html;
 }
+
+function getDomain(url) {
+  try { return new URL(url).hostname.replace(/^www\./, ""); } catch { return ""; }
+}
+
+function getTopicClass(tags) {
+  const t = (tags[0] || "").toLowerCase();
+  if (/humanoid|robot|locomotion|manipulation|dexterous|legged|tactile|sim-to-real/.test(t)) return "topic-embodied";
+  if (/agent|planning|reasoning|tool use|multi-agent/.test(t)) return "topic-agentic";
+  if (/physics|simulation|differentiable|neural physics/.test(t)) return "topic-physics";
+  if (/quantum/.test(t)) return "topic-quantum";
+  return "topic-default";
+}
+
+const TOPIC_ICONS = {
+  "topic-embodied": "🤖",
+  "topic-agentic":  "🧠",
+  "topic-physics":  "⚛️",
+  "topic-quantum":  "💫",
+  "topic-default":  "🔬",
+};
 
 // ── TAB DEFINITIONS ──────────────────────────────────────────────────────────
 
@@ -114,19 +171,24 @@ function renderArticle(a) {
   const company = a.company ? `<span class="badge badge-company">${a.company}</span>` : "";
   const date = a.published ? new Date(a.published).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "";
   const sigClass = a.significance ? `sig-${a.significance}` : "";
-  const photoUrl = getPhotoUrl(tags, a.title);
+  const topicClass = getTopicClass(tags);
+  const topicIcon = TOPIC_ICONS[topicClass];
   const graphicLabel = tags[0] || a.source || "ai";
+  const domain = getDomain(a.url);
+  const favicon = domain ? `<img class="source-favicon" src="https://www.google.com/s2/favicons?domain=${domain}&sz=16" alt="" onerror="this.style.display='none'"/>` : "";
 
   return `
     <div class="article-card ${sigClass}">
       <a href="${a.url}" target="_blank" rel="noopener" style="text-decoration:none;">
-        <div class="article-graphic">
-          <img class="article-graphic-img" src="${photoUrl}" alt="${graphicLabel}" loading="lazy" onerror="this.style.display='none'"/>
+        <div class="article-graphic ${topicClass}">
+          <span class="article-graphic-icon">${topicIcon}</span>
+          <img class="article-graphic-img" src="${getPhotoUrl(tags, a.title)}" alt="${graphicLabel}" loading="lazy" onerror="this.style.display='none'"/>
           <span class="graphic-topic-label">${graphicLabel}</span>
         </div>
       </a>
       <div class="article-card-body">
         <div class="article-source-row">
+          ${favicon}
           <span class="article-source">${a.source}</span>
           ${date ? `<span class="article-date">${date}</span>` : ""}
         </div>
@@ -226,12 +288,31 @@ function renderArticleList() {
   }
 }
 
+function updateStats() {
+  const total = allArticles.length;
+  const sources = new Set(allArticles.map(a => a.source).filter(Boolean)).size;
+  const dates = allArticles.map(a => a.published).filter(Boolean).sort().reverse();
+  const latest = dates[0]
+    ? new Date(dates[0]).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })
+    : "—";
+  document.getElementById("stat-articles").textContent = total || "—";
+  document.getElementById("stat-sources").textContent = sources || "—";
+  document.getElementById("stat-latest").textContent = latest;
+}
+
+function updateLastUpdated() {
+  const el = document.getElementById("last-updated");
+  el.textContent = "Updated " + new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+}
+
 async function loadArticles() {
   const list = document.getElementById("articles-list");
   list.innerHTML = "<div class='empty-state'><div class='empty-state-icon'>⏳</div>Loading...</div>";
   try {
     allArticles = await fetchJSON("/api/articles?limit=200");
     renderArticleList();
+    updateStats();
+    updateLastUpdated();
   } catch (e) {
     list.innerHTML = "<div class='empty-state'><div class='empty-state-icon'>⚠️</div>Failed to load articles.</div>";
   }
@@ -247,16 +328,18 @@ function switchTab(tab) {
     btn.classList.toggle("active", btn.dataset.tab === tab);
   });
 
-  // Update section titles
-  document.getElementById("trends-title").textContent = TABS[tab].trendsTitle;
-  document.getElementById("articles-title").textContent =
-    tab === "all" ? "Latest Articles" : TABS[tab].label + " — Latest Articles";
-
-  // Reload trends and signals for this tab
-  loadTrends(tab);
-  loadSignals(tab);
-
-  renderArticleList();
+  // Fade out, update content, fade in
+  const content = document.getElementById("tab-content");
+  content.classList.add("fading");
+  setTimeout(() => {
+    document.getElementById("trends-title").textContent = TABS[tab].trendsTitle;
+    document.getElementById("articles-title").textContent =
+      tab === "all" ? "Latest Articles" : TABS[tab].label + " — Latest Articles";
+    loadTrends(tab);
+    loadSignals(tab);
+    renderArticleList();
+    content.classList.remove("fading");
+  }, 200);
 }
 
 document.querySelectorAll(".tab-btn").forEach(btn => {
@@ -299,6 +382,7 @@ function startScanPolling() {
         scanPollInterval = null;
         btn.disabled = false;
         btn.textContent = "Run Scan";
+        btn.classList.remove("scanning");
         status.textContent = "Scan complete. Refreshing results...";
         await Promise.all([loadArticles(), loadTrends(activeTab), loadSignals(activeTab), loadFilters()]);
         status.textContent = `Scan complete — ${state.saved} articles saved.`;
@@ -313,6 +397,7 @@ document.getElementById("scan-btn").addEventListener("click", async () => {
   const status = document.getElementById("scan-status");
   btn.disabled = true;
   btn.textContent = "Scanning...";
+  btn.classList.add("scanning");
   status.textContent = "Scan started — this may take a few minutes.";
   try {
     await fetch("/api/scan", { method: "POST" });
@@ -339,6 +424,7 @@ loadArticles();
       const status = document.getElementById("scan-status");
       btn.disabled = true;
       btn.textContent = "Scanning...";
+      btn.classList.add("scanning");
       status.textContent = "Scan in progress...";
       startScanPolling();
     }

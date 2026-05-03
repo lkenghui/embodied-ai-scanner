@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AI Scanner</title>
-  <link rel="stylesheet" href="/static/styles.css?v=12" />
+  <link rel="stylesheet" href="/static/styles.css?v=13" />
 </head>
 <body>
 
@@ -17,6 +17,7 @@
         <span class="logo-sub">Research &amp; Industry Intelligence</span>
       </div>
       <div class="header-right">
+        <div id="last-updated" class="last-updated"></div>
         <div id="scan-status"></div>
         <button id="scan-btn">Run Scan</button>
       </div>
@@ -37,10 +38,29 @@
     </div>
   </nav>
 
+  <div class="stats-bar">
+    <div class="stats-bar-inner">
+      <div class="stat-item">
+        <span class="stat-value" id="stat-articles">—</span>
+        <span class="stat-label">Articles</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-value" id="stat-sources">—</span>
+        <span class="stat-label">Sources</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-value" id="stat-latest">—</span>
+        <span class="stat-label">Latest Article</span>
+      </div>
+    </div>
+  </div>
+
   <main>
 
     <!-- Trends + Signals side by side -->
-    <div class="insight-grid section-divider">
+    <div class="insight-grid section-divider tab-content" id="tab-content">
       <section id="trends-section">
         <div class="section-header">
           <h2 id="trends-title">Weekly Trends</h2>
@@ -87,6 +107,6 @@
 
   </main>
 
-  <script src="/static/app.js?v=12"></script>
+  <script src="/static/app.js?v=13"></script>
 </body>
 </html>
