@@ -5,12 +5,50 @@ async function fetchJSON(url) {
 }
 
 function renderMarkdown(text) {
-  // Basic markdown: bullet points and bold
   return text
     .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
     .replace(/^- (.+)$/gm, "<li>$1</li>")
     .replace(/(<li>.*<\/li>)/gs, "<ul>$1</ul>");
 }
+
+// ── TAB DEFINITIONS ──────────────────────────────────────────────────────────
+
+const TABS = {
+  all: {
+    label: "General AI Trends",
+    keywords: [],   // empty = show all
+    trendsTitle: "Weekly Trends — All AI",
+  },
+  embodied: {
+    label: "Embodied AI",
+    keywords: ["humanoid", "locomotion", "manipulation", "dexterous", "whole-body",
+               "sim-to-real", "world model", "vision-language-action", "legged",
+               "autonomous navigation", "tactile", "hardware", "imitation learning"],
+    trendsTitle: "Weekly Trends — Embodied AI",
+  },
+  agentic: {
+    label: "Agentic AI",
+    keywords: ["agentic", "multi-agent", "tool use", "ai planning", "ai reasoning",
+               "autonomous agent", "agent framework"],
+    trendsTitle: "Weekly Trends — Agentic AI",
+  },
+  physics: {
+    label: "Physics-based AI",
+    keywords: ["physics simulation", "physics-informed", "differentiable simulation",
+               "neural physics", "generative physics"],
+    trendsTitle: "Weekly Trends — Physics-based AI",
+  },
+  quantum: {
+    label: "Quantum AI",
+    keywords: ["quantum machine learning", "quantum computing", "quantum algorithm",
+               "quantum hardware", "quantum neural"],
+    trendsTitle: "Weekly Trends — Quantum AI",
+  },
+};
+
+let activeTab = "all";
+
+// ── PHOTO HELPERS ─────────────────────────────────────────────────────────────
 
 const TOPIC_KEYWORDS = {
   "humanoid":               "humanoid,robot",
@@ -27,6 +65,17 @@ const TOPIC_KEYWORDS = {
   "autonomous navigation":  "autonomous,robot",
   "tactile sensing":        "robot,sensor",
   "hardware":               "robotics,hardware",
+  "agentic ai":             "artificial,intelligence",
+  "multi-agent systems":    "technology,network",
+  "tool use":               "computer,technology",
+  "ai planning":            "artificial,intelligence",
+  "ai reasoning":           "artificial,intelligence",
+  "physics simulation":     "physics,simulation",
+  "physics-informed ml":    "science,technology",
+  "quantum machine learning":"quantum,technology",
+  "quantum computing":      "quantum,computer",
+  "foundation models":      "artificial,intelligence",
+  "large language models":  "language,technology",
   "investment/funding":     "technology,startup",
   "policy/regulation":      "technology,policy",
 };
@@ -38,7 +87,7 @@ function titleSeed(title) {
 }
 
 function getPhotoUrl(tags, title) {
-  var keywords = "robot,artificial,intelligence";
+  var keywords = "artificial,intelligence";
   if (tags.length > 0) {
     var key = tags[0].toLowerCase();
     for (var k in TOPIC_KEYWORDS) {
@@ -48,10 +97,11 @@ function getPhotoUrl(tags, title) {
       }
     }
   }
-  // Use a seed so same article always gets same image
   var seed = titleSeed(title) % 9000 + 1000;
   return "https://loremflickr.com/600/340/" + keywords + "?lock=" + seed;
 }
+
+// ── RENDER HELPERS ────────────────────────────────────────────────────────────
 
 function significanceBadge(sig) {
   const cls = sig === "high" ? "badge-high" : sig === "medium" ? "badge-medium" : "badge-low";
@@ -64,9 +114,8 @@ function renderArticle(a) {
   const company = a.company ? `<span class="badge badge-company">${a.company}</span>` : "";
   const date = a.published ? new Date(a.published).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "";
   const sigClass = a.significance ? `sig-${a.significance}` : "";
-
   const photoUrl = getPhotoUrl(tags, a.title);
-  const graphicLabel = tags[0] || a.source || "embodied ai";
+  const graphicLabel = tags[0] || a.source || "ai";
 
   return `
     <div class="article-card ${sigClass}">
@@ -92,16 +141,20 @@ function renderArticle(a) {
     </div>`;
 }
 
+// ── DATA LOADING ──────────────────────────────────────────────────────────────
+
 async function loadFilters() {
   try {
     const { sources, companies } = await fetchJSON("/api/filters");
     const srcSel = document.getElementById("filter-source");
+    srcSel.innerHTML = '<option value="">All Sources</option>';
     sources.forEach(s => {
       const opt = document.createElement("option");
       opt.value = s; opt.textContent = s;
       srcSel.appendChild(opt);
     });
     const coSel = document.getElementById("filter-company");
+    coSel.innerHTML = '<option value="">All Companies</option>';
     companies.forEach(c => {
       const opt = document.createElement("option");
       opt.value = c; opt.textContent = c;
@@ -140,19 +193,24 @@ async function loadSignals() {
 
 let allArticles = [];
 
+function articleMatchesTab(a, tab) {
+  if (tab === "all") return true;
+  const tabKeywords = TABS[tab].keywords;
+  const tagsLower = (a.tags || "").toLowerCase();
+  const titleLower = (a.title || "").toLowerCase();
+  return tabKeywords.some(kw => tagsLower.includes(kw) || titleLower.includes(kw));
+}
+
 function renderArticleList() {
-  var topic      = document.getElementById("filter-topic").value;
-  var source     = document.getElementById("filter-source").value;
-  var company    = document.getElementById("filter-company").value;
-  var significance = document.getElementById("filter-significance").value;
-  var list = document.getElementById("articles-list");
+  const source     = document.getElementById("filter-source").value;
+  const company    = document.getElementById("filter-company").value;
+  const significance = document.getElementById("filter-significance").value;
+  const list = document.getElementById("articles-list");
 
-  var filtered = allArticles;
-
-  if (topic)       filtered = filtered.filter(function(a) { return (a.tags || "").toLowerCase().indexOf(topic) !== -1; });
-  if (source)      filtered = filtered.filter(function(a) { return a.source === source; });
-  if (company)     filtered = filtered.filter(function(a) { return (a.company || "").toLowerCase().indexOf(company.toLowerCase()) !== -1; });
-  if (significance)filtered = filtered.filter(function(a) { return a.significance === significance; });
+  var filtered = allArticles.filter(a => articleMatchesTab(a, activeTab));
+  if (source)      filtered = filtered.filter(a => a.source === source);
+  if (company)     filtered = filtered.filter(a => (a.company || "").toLowerCase().includes(company.toLowerCase()));
+  if (significance)filtered = filtered.filter(a => a.significance === significance);
 
   document.getElementById("article-count").textContent = "(" + filtered.length + ")";
   if (filtered.length === 0) {
@@ -173,7 +231,31 @@ async function loadArticles() {
   }
 }
 
+// ── TAB SWITCHING ─────────────────────────────────────────────────────────────
+
+function switchTab(tab) {
+  activeTab = tab;
+
+  // Update tab button styles
+  document.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.tab === tab);
+  });
+
+  // Update section titles
+  document.getElementById("trends-title").textContent = TABS[tab].trendsTitle;
+  document.getElementById("articles-title").textContent =
+    tab === "all" ? "Latest Articles" : TABS[tab].label + " — Latest Articles";
+
+  renderArticleList();
+}
+
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => switchTab(btn.dataset.tab));
+});
+
 document.getElementById("apply-filters").addEventListener("click", renderArticleList);
+
+// ── SCAN PROGRESS ─────────────────────────────────────────────────────────────
 
 let scanPollInterval = null;
 
@@ -181,7 +263,6 @@ function updateProgressBar(processed, total, saved) {
   const wrap = document.getElementById("scan-progress-wrap");
   const bar = document.getElementById("scan-progress-bar");
   const label = document.getElementById("scan-progress-label");
-  wrap.style.display = "block";
   wrap.style.setProperty("display", "block", "important");
   const pct = total > 0 ? Math.round((processed / total) * 100) : 0;
   bar.style.width = pct + "%";
@@ -202,9 +283,7 @@ function startScanPolling() {
   scanPollInterval = setInterval(async () => {
     try {
       const state = await fetchJSON("/api/scan/status");
-      if (state.total > 0) {
-        updateProgressBar(state.processed, state.total, state.saved);
-      }
+      if (state.total > 0) updateProgressBar(state.processed, state.total, state.saved);
       if (!state.running) {
         clearInterval(scanPollInterval);
         scanPollInterval = null;
@@ -231,17 +310,17 @@ document.getElementById("scan-btn").addEventListener("click", async () => {
   } catch (e) {
     status.textContent = "Failed to start scan.";
     btn.disabled = false;
-    btn.textContent = "Run Scan Now";
+    btn.textContent = "Run Scan";
   }
 });
 
-// Init
+// ── INIT ──────────────────────────────────────────────────────────────────────
+
 loadFilters();
 loadTrends();
 loadSignals();
 loadArticles();
 
-// Auto-detect if a scan is already running on page load
 (async () => {
   try {
     const state = await fetchJSON("/api/scan/status");

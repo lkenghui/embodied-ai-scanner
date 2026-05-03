@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI Intelligence Scanner</title>
-  <link rel="stylesheet" href="/static/styles.css?v=11" />
+  <title>AI Scanner</title>
+  <link rel="stylesheet" href="/static/styles.css?v=12" />
 </head>
 <body>
 
@@ -13,8 +13,8 @@
   <header>
     <div class="header-inner">
       <div class="header-logo">
-        <h1>AI Intelligence Scanner</h1>
-        <span class="logo-sub">Embodied AI · Agentic AI · Physics AI · Quantum AI · Trends</span>
+        <h1>AI Scanner</h1>
+        <span class="logo-sub">Research &amp; Industry Intelligence</span>
       </div>
       <div class="header-right">
         <div id="scan-status"></div>
@@ -27,6 +27,15 @@
     </div>
   </header>
 
+  <nav class="tab-nav">
+    <div class="tab-nav-inner">
+      <button class="tab-btn active" data-tab="all">General AI Trends</button>
+      <button class="tab-btn" data-tab="embodied">Embodied AI</button>
+      <button class="tab-btn" data-tab="agentic">Agentic AI</button>
+      <button class="tab-btn" data-tab="physics">Physics-based AI</button>
+      <button class="tab-btn" data-tab="quantum">Quantum AI</button>
+    </div>
+  </nav>
 
   <main>
 
@@ -34,7 +43,7 @@
     <div class="insight-grid section-divider">
       <section id="trends-section">
         <div class="section-header">
-          <h2>Weekly Trends</h2>
+          <h2 id="trends-title">Weekly Trends</h2>
         </div>
         <div id="trends-content" class="insight-card">Loading...</div>
         <p id="trends-date" class="meta"></p>
@@ -54,42 +63,6 @@
     <section id="filters-section" class="filters-section">
       <div class="filters-card">
         <div class="filters">
-          <select id="filter-topic">
-            <option value="">All Topics</option>
-            <optgroup label="Embodied AI &amp; Robotics">
-              <option value="humanoid">Humanoid</option>
-              <option value="locomotion">Locomotion</option>
-              <option value="manipulation">Manipulation</option>
-              <option value="world model">World Models</option>
-              <option value="sim-to-real">Sim-to-Real</option>
-              <option value="vision-language-action">VLA</option>
-              <option value="hardware">Hardware</option>
-              <option value="tactile">Tactile Sensing</option>
-            </optgroup>
-            <optgroup label="Agentic AI">
-              <option value="agentic AI">Agentic AI</option>
-              <option value="multi-agent">Multi-Agent</option>
-              <option value="tool use">Tool Use</option>
-              <option value="AI planning">AI Planning</option>
-              <option value="AI reasoning">AI Reasoning</option>
-            </optgroup>
-            <optgroup label="Physics-based AI">
-              <option value="physics simulation">Physics Simulation</option>
-              <option value="physics-informed">Physics-Informed ML</option>
-              <option value="differentiable simulation">Differentiable Sim</option>
-            </optgroup>
-            <optgroup label="Quantum Computing &amp; AI">
-              <option value="quantum machine learning">Quantum ML</option>
-              <option value="quantum computing">Quantum Computing</option>
-              <option value="quantum hardware">Quantum Hardware</option>
-            </optgroup>
-            <optgroup label="General AI">
-              <option value="foundation models">Foundation Models</option>
-              <option value="large language models">LLMs</option>
-              <option value="AI safety">AI Safety</option>
-              <option value="investment">Funding</option>
-            </optgroup>
-          </select>
           <select id="filter-source"><option value="">All Sources</option></select>
           <select id="filter-company"><option value="">All Companies</option></select>
           <select id="filter-significance">
@@ -106,7 +79,7 @@
     <!-- Articles -->
     <section id="articles-section">
       <div class="section-header">
-        <h2>Latest Articles</h2>
+        <h2 id="articles-title">Latest Articles</h2>
         <span id="article-count"></span>
       </div>
       <div id="articles-list" class="articles-grid"></div>
@@ -114,6 +87,6 @@
 
   </main>
 
-  <script src="/static/app.js?v=11"></script>
+  <script src="/static/app.js?v=12"></script>
 </body>
 </html>
