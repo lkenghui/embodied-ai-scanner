@@ -52,6 +52,13 @@ def init_db():
         CREATE INDEX IF NOT EXISTS idx_snapshots_date     ON topic_snapshots(scan_date);
     """)
     conn.commit()
+
+    # Migrations: add columns if they don't exist yet
+    for table in ("trends", "signals"):
+        cols = [row[1] for row in conn.execute(f"PRAGMA table_info({table})").fetchall()]
+        if "topic_area" not in cols:
+            conn.execute(f"ALTER TABLE {table} ADD COLUMN topic_area TEXT NOT NULL DEFAULT 'all'")
+    conn.commit()
     conn.close()
 
 
