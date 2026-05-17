@@ -1,7 +1,4 @@
-import anthropic
-from config import ANTHROPIC_API_KEY
-
-client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+from backend.agents.openai_client import generate_text
 
 SYSTEM_PROMPT = """You are a senior technology analyst covering AI research and industry.
 You will receive a list of recent article titles and their tags across five areas:
@@ -30,10 +27,9 @@ def generate_trend_report(articles: list[dict]) -> str:
         lines.append(f"- {a['title']}{company} | tags: {tags} | significance: {a.get('significance', '')}")
 
     content = "\n".join(lines)
-    message = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=600,
-        system=SYSTEM_PROMPT,
-        messages=[{"role": "user", "content": f"Recent articles:\n{content}"}],
+    return generate_text(
+        SYSTEM_PROMPT,
+        f"Recent articles:\n{content}",
+        report=True,
+        max_output_tokens=800,
     )
-    return message.content[0].text.strip()

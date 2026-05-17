@@ -1,8 +1,4 @@
-import anthropic
-import json
-from config import ANTHROPIC_API_KEY
-
-client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+from backend.agents.openai_client import generate_json
 
 TOPICS = [
     # Embodied AI / Robotics
@@ -29,24 +25,35 @@ Given an article title and abstract, return JSON with:
    medium = incremental research, company update;
    low = minor news, opinion piece)
 
-Respond with JSON only."""
+Respond with structured JSON only."""
+
+TAG_SCHEMA = {
+    "type": "object",
+    "additionalProperties": False,
+    "properties": {
+        "topics": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 3,
+            "items": {"type": "string", "enum": TOPICS},
+        },
+        "significance": {"type": "string", "enum": ["high", "medium", "low"]},
+    },
+    "required": ["topics", "significance"],
+}
 
 
 def tag(title: str, abstract: str) -> tuple[list[str], str]:
     """Returns (topics, significance)."""
     text = f"Title: {title}\n\nAbstract: {abstract[:1500]}"
-    message = client.messages.create(
-        model="claude-haiku-4-5-20251001",
-        max_tokens=150,
-        system=SYSTEM_PROMPT,
-        messages=[{"role": "user", "content": text}],
-    )
     try:
-        import re
-        text = message.content[0].text
-        text = re.sub(r"^```[a-z]*\n?", "", text.strip(), flags=re.MULTILINE)
-        text = text.rstrip("`").strip()
-        data = json.loads(text)
+        data = generate_json(
+            SYSTEM_PROMPT,
+            text,
+            TAG_SCHEMA,
+            name="article_tags",
+            max_output_tokens=250,
+        )
         topics = data.get("topics", [])
         significance = data.get("significance", "medium")
         return topics, significance

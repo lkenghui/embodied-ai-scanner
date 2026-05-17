@@ -1,7 +1,4 @@
-import anthropic
-from config import ANTHROPIC_API_KEY
-
-client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+from backend.agents.openai_client import generate_text
 
 SYSTEM_PROMPT = """You are a concise technology analyst specialising in embodied AI.
 Summarise the given article or paper in 2-3 sentences for a non-technical executive audience.
@@ -11,10 +8,4 @@ Be factual and avoid hype."""
 
 def summarise(title: str, abstract: str) -> str:
     text = f"Title: {title}\n\nContent: {abstract[:2000]}"
-    message = client.messages.create(
-        model="claude-haiku-4-5-20251001",
-        max_tokens=200,
-        system=SYSTEM_PROMPT,
-        messages=[{"role": "user", "content": text}],
-    )
-    return message.content[0].text.strip()
+    return generate_text(SYSTEM_PROMPT, text, max_output_tokens=250)

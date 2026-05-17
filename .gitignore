@@ -4,6 +4,7 @@ __pycache__/
 *.db
 data/
 venv/
+.venv/
 .DS_Store
 *.egg-info/
 dist/

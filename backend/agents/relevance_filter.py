@@ -1,7 +1,5 @@
-import anthropic
-from config import ANTHROPIC_API_KEY, COMPANIES
-
-client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+from config import COMPANIES
+from backend.agents.openai_client import generate_json
 
 SYSTEM_PROMPT = """You are an expert technology analyst covering AI research and industry developments.
 Your job is to determine if a given article or paper is relevant to any of these areas:
@@ -22,24 +20,30 @@ Your job is to determine if a given article or paper is relevant to any of these
 5. General AI Trends: foundation models, large language models, major AI research breakthroughs,
    significant AI company news, AI policy and regulation, major AI product launches.
 
-Respond with JSON only: {"relevant": true/false, "reason": "one sentence"}"""
+Respond with structured JSON only."""
+
+RELEVANCE_SCHEMA = {
+    "type": "object",
+    "additionalProperties": False,
+    "properties": {
+        "relevant": {"type": "boolean"},
+        "reason": {"type": "string"},
+    },
+    "required": ["relevant", "reason"],
+}
 
 
 def is_relevant(title: str, abstract: str) -> tuple[bool, str]:
     """Returns (is_relevant, reason)."""
     text = f"Title: {title}\n\nAbstract: {abstract[:1500]}"
-    message = client.messages.create(
-        model="claude-haiku-4-5-20251001",
-        max_tokens=100,
-        system=SYSTEM_PROMPT,
-        messages=[{"role": "user", "content": text}],
-    )
-    import json, re
     try:
-        text = message.content[0].text
-        text = re.sub(r"^```[a-z]*\n?", "", text.strip(), flags=re.MULTILINE)
-        text = text.rstrip("`").strip()
-        data = json.loads(text)
+        data = generate_json(
+            SYSTEM_PROMPT,
+            text,
+            RELEVANCE_SCHEMA,
+            name="relevance_result",
+            max_output_tokens=150,
+        )
         return data.get("relevant", False), data.get("reason", "")
     except Exception:
         return False, ""

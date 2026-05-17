@@ -2,11 +2,8 @@
 Detects weak signals: topics that are low in absolute volume but accelerating fast.
 Compares recent scan window (last 14 days) vs previous window (15-45 days ago).
 """
-import anthropic
 from collections import defaultdict
-from config import ANTHROPIC_API_KEY
-
-client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+from backend.agents.openai_client import generate_text
 
 SYSTEM_PROMPT = """You are a strategic technology analyst covering AI research and industry.
 
@@ -78,10 +75,9 @@ def detect_weak_signals(topic_history: list[dict]) -> str:
 
     content = "\n".join(lines)
 
-    message = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=800,
-        system=SYSTEM_PROMPT,
-        messages=[{"role": "user", "content": f"Topic frequency comparison:\n\n{content}"}],
+    return generate_text(
+        SYSTEM_PROMPT,
+        f"Topic frequency comparison:\n\n{content}",
+        report=True,
+        max_output_tokens=1000,
     )
-    return message.content[0].text.strip()

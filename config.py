@@ -3,7 +3,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+OPENAI_FAST_MODEL = os.getenv("OPENAI_FAST_MODEL", "gpt-5.2-mini")
+OPENAI_REPORT_MODEL = os.getenv("OPENAI_REPORT_MODEL", "gpt-5.2")
 DATABASE_PATH = os.path.join(os.path.dirname(__file__), "data", "scanner.db")
 
 COMPANIES = [
