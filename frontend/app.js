@@ -1,5 +1,5 @@
-async function fetchJSON(url) {
-  const res = await fetch(url);
+async function fetchJSON(url, opts) {
+  const res = await fetch(url, opts);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }
@@ -383,6 +383,11 @@ function startScanPolling() {
         btn.disabled = false;
         btn.textContent = "Run Scan";
         btn.classList.remove("scanning");
+        if (state.stage && state.stage.includes("OpenAI API key missing")) {
+          hideProgressBar();
+          status.textContent = "OpenAI API key is not configured. Add OPENAI_API_KEY to .env before running a scan.";
+          return;
+        }
         status.textContent = "Scan complete. Refreshing results...";
         await Promise.all([loadArticles(), loadTrends(activeTab), loadSignals(activeTab), loadFilters()]);
         status.textContent = `Scan complete — ${state.saved} articles saved.`;
@@ -400,7 +405,15 @@ document.getElementById("scan-btn").addEventListener("click", async () => {
   btn.classList.add("scanning");
   status.textContent = "Scan started — this may take a few minutes.";
   try {
-    await fetch("/api/scan", { method: "POST" });
+    const data = await fetchJSON("/api/scan", { method: "POST" });
+    if (data.status === "missing_openai_api_key") {
+      status.textContent = data.message;
+      btn.disabled = false;
+      btn.textContent = "Run Scan";
+      btn.classList.remove("scanning");
+      hideProgressBar();
+      return;
+    }
     startScanPolling();
   } catch (e) {
     status.textContent = "Failed to start scan.";
