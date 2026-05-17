@@ -10,10 +10,11 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from backend.scrapers import fetch_arxiv_papers, fetch_mit_tech_review, fetch_company_blogs, fetch_venturebeat, fetch_the_verge
 from backend.agents import is_relevant, detect_company, summarise, tag, generate_trend_report, detect_weak_signals
 from backend.database import upsert_article, save_trend_report, get_articles, save_topic_snapshot, get_topic_history, save_signal_report
-from config import TOPIC_AREA_KEYWORDS
+from config import OPENAI_API_KEY, TOPIC_AREA_KEYWORDS
 
 _scan_lock = threading.Lock()
 scan_state = {"running": False, "processed": 0, "total": 0, "saved": 0, "stage": ""}
+MISSING_OPENAI_KEY_STAGE = "OpenAI API key missing. Add OPENAI_API_KEY to .env before running a scan."
 
 
 def get_scan_state():
@@ -27,13 +28,28 @@ def run_scan():
     scan_state.update({"running": True, "processed": 0, "total": 0, "saved": 0, "stage": "starting"})
     try:
         _run_scan()
+    except Exception as e:
+        scan_state["stage"] = f"failed: {e}"
+        print(f"[pipeline] Scan failed: {e}")
     finally:
-        scan_state.update({"running": False, "stage": "complete"})
+        if not scan_state["stage"].startswith("failed:"):
+            if scan_state["stage"] != MISSING_OPENAI_KEY_STAGE:
+                scan_state["stage"] = "complete"
+        scan_state["running"] = False
         _scan_lock.release()
 
 
 def _run_scan():
     print("[pipeline] Starting scan...")
+    if not OPENAI_API_KEY:
+        scan_state.update({
+            "stage": MISSING_OPENAI_KEY_STAGE,
+            "processed": 0,
+            "total": 0,
+            "saved": 0,
+        })
+        print("[pipeline] OPENAI_API_KEY is not configured; scan skipped.")
+        return
 
     raw_items = []
     for fetch_fn in (fetch_arxiv_papers, fetch_mit_tech_review, fetch_company_blogs, fetch_venturebeat, fetch_the_verge):

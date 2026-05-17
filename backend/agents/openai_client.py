@@ -3,13 +3,15 @@ from typing import Any
 
 from openai import OpenAI
 
-from config import OPENAI_FAST_MODEL, OPENAI_REPORT_MODEL
+from config import OPENAI_API_KEY, OPENAI_FAST_MODEL, OPENAI_REPORT_MODEL
 
 _client = None
 
 
 def get_client() -> OpenAI:
     global _client
+    if not OPENAI_API_KEY:
+        raise RuntimeError("OPENAI_API_KEY is not configured. Add it to .env to run AI analysis.")
     if _client is None:
         _client = OpenAI()
     return _client
