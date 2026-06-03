@@ -18,13 +18,18 @@ def get_client() -> anthropic.Anthropic:
     return _client
 
 
+def _safe_str(text: str) -> str:
+    """Strip non-ASCII characters to avoid encoding issues on servers with ASCII locale."""
+    return text.encode("ascii", errors="ignore").decode("ascii")
+
+
 def generate_text(system_prompt: str, user_prompt: str, *, report: bool = False, max_output_tokens: int = 600) -> str:
     model = ANTHROPIC_REPORT_MODEL if report else ANTHROPIC_FAST_MODEL
     message = get_client().messages.create(
         model=model,
         max_tokens=max_output_tokens,
-        system=system_prompt,
-        messages=[{"role": "user", "content": user_prompt}],
+        system=_safe_str(system_prompt),
+        messages=[{"role": "user", "content": _safe_str(user_prompt)}],
     )
     return message.content[0].text.strip()
 
