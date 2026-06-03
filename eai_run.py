@@ -1,6 +1,13 @@
+import sys
 import uvicorn
 import os
 from backend.database import init_db
+
+# Force UTF-8 encoding on servers with ASCII default locale
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
+if hasattr(sys.stderr, 'reconfigure'):
+    sys.stderr.reconfigure(encoding='utf-8')
 
 if __name__ == "__main__":
     init_db()
