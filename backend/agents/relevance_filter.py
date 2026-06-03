@@ -20,7 +20,8 @@ Your job is to determine if a given article or paper is relevant to any of these
 5. General AI Trends: foundation models, large language models, major AI research breakthroughs,
    significant AI company news, AI policy and regulation, major AI product launches.
 
-Respond with structured JSON only."""
+Respond with ONLY this JSON, no other fields:
+{"relevant": true or false, "reason": "one sentence explanation"}"""
 
 RELEVANCE_SCHEMA = {
     "type": "object",
@@ -42,13 +43,19 @@ def is_relevant(title: str, abstract: str) -> tuple[bool, str]:
             text,
             RELEVANCE_SCHEMA,
             name="relevance_result",
-            max_output_tokens=150,
+            max_output_tokens=300,
         )
-        return data.get("relevant", False), data.get("reason", "")
+        # Accept any common field name variant Claude might use
+        relevant = (
+            data.get("relevant")
+            or data.get("is_relevant")
+            or data.get("is_relevant?")
+            or False
+        )
+        reason = data.get("reason") or data.get("reasoning") or ""
+        return bool(relevant), reason
     except Exception as e:
-        import traceback
         print(f"[relevance_filter] Error: {e}")
-        traceback.print_exc()
         return False, ""
 
 
