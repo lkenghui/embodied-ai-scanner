@@ -1,5 +1,5 @@
 from config import COMPANIES
-from backend.agents.openai_client import generate_json
+from backend.agents.anthropic_client import generate_json
 
 SYSTEM_PROMPT = """You are an expert technology analyst covering AI research and industry developments.
 Your job is to determine if a given article or paper is relevant to any of these areas:

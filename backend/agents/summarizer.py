@@ -1,4 +1,4 @@
-from backend.agents.openai_client import generate_text
+from backend.agents.anthropic_client import generate_text
 
 SYSTEM_PROMPT = """You are a concise technology analyst specialising in embodied AI.
 Summarise the given article or paper in 2-3 sentences for a non-technical executive audience.

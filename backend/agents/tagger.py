@@ -1,4 +1,4 @@
-from backend.agents.openai_client import generate_json
+from backend.agents.anthropic_client import generate_json
 
 TOPICS = [
     # Embodied AI / Robotics

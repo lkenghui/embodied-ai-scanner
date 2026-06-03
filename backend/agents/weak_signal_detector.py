@@ -3,7 +3,7 @@ Detects weak signals: topics that are low in absolute volume but accelerating fa
 Compares recent scan window (last 14 days) vs previous window (15-45 days ago).
 """
 from collections import defaultdict
-from backend.agents.openai_client import generate_text
+from backend.agents.anthropic_client import generate_text
 
 SYSTEM_PROMPT = """You are a strategic technology analyst covering AI research and industry.
 

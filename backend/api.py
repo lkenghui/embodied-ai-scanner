@@ -7,8 +7,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from apscheduler.schedulers.background import BackgroundScheduler
 from backend.database import init_db, get_articles, get_latest_trend, get_sources, get_companies, get_latest_signal
-from backend.pipeline import MISSING_OPENAI_KEY_STAGE, get_scan_state, run_scan
-from config import OPENAI_API_KEY, SCAN_HOUR, SCAN_MINUTE
+from backend.pipeline import MISSING_ANTHROPIC_KEY_STAGE, get_scan_state, run_scan
+from config import ANTHROPIC_API_KEY, SCAN_HOUR, SCAN_MINUTE
 
 app = FastAPI(title="Embodied AI Scanner")
 
@@ -57,10 +57,10 @@ def scan_status():
 @app.post("/api/scan")
 def trigger_scan():
     """Manually trigger a scan."""
-    if not OPENAI_API_KEY:
+    if not ANTHROPIC_API_KEY:
         return {
-            "status": "missing_openai_api_key",
-            "message": MISSING_OPENAI_KEY_STAGE,
+            "status": "missing_anthropic_api_key",
+            "message": MISSING_ANTHROPIC_KEY_STAGE,
         }
     import threading
     threading.Thread(target=run_scan, daemon=True).start()

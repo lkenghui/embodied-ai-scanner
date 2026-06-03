@@ -1,4 +1,4 @@
-from backend.agents.openai_client import generate_text
+from backend.agents.anthropic_client import generate_text
 
 SYSTEM_PROMPT = """You are a senior technology analyst covering AI research and industry.
 You will receive a list of recent article titles and their tags across five areas:
