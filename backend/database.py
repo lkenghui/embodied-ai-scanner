@@ -1,9 +1,11 @@
+import os
 import sqlite3
 from datetime import datetime
 from config import DATABASE_PATH
 
 
 def get_conn():
+    os.makedirs(os.path.dirname(DATABASE_PATH), exist_ok=True)
     conn = sqlite3.connect(DATABASE_PATH)
     conn.row_factory = sqlite3.Row
     return conn
