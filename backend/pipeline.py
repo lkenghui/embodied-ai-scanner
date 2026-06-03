@@ -62,11 +62,14 @@ def _run_scan():
     print(f"[pipeline] Fetched {len(raw_items)} raw items total")
     scan_state.update({"stage": "filtering", "total": len(raw_items), "processed": 0})
 
+    def _ascii(s: str) -> str:
+        return (s or "").encode("ascii", errors="ignore").decode("ascii")
+
     saved = 0
     topic_counts = {}
     for item in raw_items:
-        title = item.get("title", "")
-        abstract = item.get("abstract", "")
+        title = _ascii(item.get("title", ""))
+        abstract = _ascii(item.get("abstract", ""))
 
         if not title or not item.get("url"):
             scan_state["processed"] += 1

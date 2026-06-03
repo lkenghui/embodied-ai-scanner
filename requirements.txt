@@ -5,5 +5,5 @@ feedparser==6.0.11
 httpx==0.27.2
 beautifulsoup4==4.12.3
 arxiv==2.1.3
-anthropic
+anthropic==0.34.2
 python-dotenv==1.0.1

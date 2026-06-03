@@ -46,7 +46,9 @@ def is_relevant(title: str, abstract: str) -> tuple[bool, str]:
         )
         return data.get("relevant", False), data.get("reason", "")
     except Exception as e:
+        import traceback
         print(f"[relevance_filter] Error: {e}")
+        traceback.print_exc()
         return False, ""
 
 
