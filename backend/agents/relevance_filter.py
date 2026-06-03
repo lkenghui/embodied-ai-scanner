@@ -45,7 +45,8 @@ def is_relevant(title: str, abstract: str) -> tuple[bool, str]:
             max_output_tokens=150,
         )
         return data.get("relevant", False), data.get("reason", "")
-    except Exception:
+    except Exception as e:
+        print(f"[relevance_filter] Error: {e}")
         return False, ""
 
 

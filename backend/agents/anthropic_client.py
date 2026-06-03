@@ -1,4 +1,5 @@
 import json
+import re
 from typing import Any
 
 import anthropic
@@ -38,9 +39,26 @@ def generate_json(
 ) -> dict[str, Any]:
     enhanced_system = system_prompt + "\n\nYou MUST respond with valid JSON only. No explanation, no markdown fences, just raw JSON."
     response = generate_text(enhanced_system, user_prompt, max_output_tokens=max_output_tokens)
-    # Strip markdown code fences if present
     response = response.strip()
-    if response.startswith("```"):
-        lines = response.split("\n")
-        response = "\n".join(lines[1:-1])
-    return json.loads(response)
+
+    # Try direct parse first
+    try:
+        return json.loads(response)
+    except json.JSONDecodeError:
+        pass
+
+    # Strip markdown fences and retry
+    response = re.sub(r"^```(?:json)?\s*", "", response)
+    response = re.sub(r"\s*```$", "", response).strip()
+    try:
+        return json.loads(response)
+    except json.JSONDecodeError:
+        pass
+
+    # Extract first {...} block and retry
+    match = re.search(r"\{.*\}", response, re.DOTALL)
+    if match:
+        return json.loads(match.group())
+
+    print(f"[anthropic_client] generate_json failed to parse response for '{name}': {response[:200]}")
+    raise ValueError(f"Could not parse JSON from response: {response[:200]}")
